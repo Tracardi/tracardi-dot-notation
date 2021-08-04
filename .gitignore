@@ -1,0 +1,5 @@
+venv
+build
+dist
+tracardi_dot_notation.egg-info
+.idea
