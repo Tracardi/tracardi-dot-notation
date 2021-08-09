@@ -84,7 +84,7 @@ class DotAccessor:
         try:
             self.__getitem__(item)
             return True
-        except KeyError:
+        except (KeyError, TypeError):
             return False
 
     @staticmethod
