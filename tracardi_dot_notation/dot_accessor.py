@@ -3,12 +3,31 @@ from dotty_dict import dotty
 
 class DotAccessor:
 
-    def __init__(self, profile, session, payload: dict, event, flow):
-        self.flow = dotty(flow.dict())
-        self.event = dotty(event.dict())
-        self.payload = dotty(payload)
-        self.session = dotty(session.dict())
-        self.profile = dotty(profile.dict())
+    def __init__(self, profile=None, session=None, payload=None, event=None, flow=None):
+        if flow is None:
+            self.flow = {}
+        else:
+            self.flow = dotty(flow.dict())
+
+        if event is None:
+            self.event = {}
+        else:
+            self.event = dotty(event.dict())
+
+        if payload is None:
+            self.payload = {}
+        else:
+            self.payload = dotty(payload)
+
+        if session is None:
+            self.session = {}
+        else:
+            self.session = dotty(session.dict())
+
+        if profile is None:
+            self.profile = {}
+        else:
+            self.profile = dotty(profile.dict())
 
     def __delitem__(self, key):
         if key.startswith('profile@'):
