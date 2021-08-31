@@ -1,1 +1,2 @@
+pydantic
 dotty-dict==1.3.0

@@ -1,33 +1,39 @@
 from dotty_dict import dotty
+from pydantic import BaseModel
 
 
 class DotAccessor:
 
+    def _convert(self, data, label):
+        if data is None:
+            return {}
+        elif isinstance(data, dict):
+            return dotty(data)
+        elif isinstance(data, BaseModel):
+            return dotty(data.dict())
+        else:
+            raise ValueError("Could not convert {} to dict. Expected: None, dict or BaseModel got {}.".format(
+                label, type(data)
+            ))
+
+    def get_all(self, dot_notation):
+        if dot_notation.startswith('flow@...'):
+            return self.flow
+        elif dot_notation.startswith('profile@...'):
+            return self.profile
+        elif dot_notation.startswith('session@...'):
+            return self.session
+        elif dot_notation.startswith('payload@...'):
+            return self.payload
+        elif dot_notation.startswith('event@...'):
+            return self.event
+
     def __init__(self, profile=None, session=None, payload=None, event=None, flow=None):
-        if flow is None:
-            self.flow = {}
-        else:
-            self.flow = dotty(flow.dict())
-
-        if event is None:
-            self.event = {}
-        else:
-            self.event = dotty(event.dict())
-
-        if payload is None:
-            self.payload = {}
-        else:
-            self.payload = dotty(payload)
-
-        if session is None:
-            self.session = {}
-        else:
-            self.session = dotty(session.dict())
-
-        if profile is None:
-            self.profile = {}
-        else:
-            self.profile = dotty(profile.dict())
+        self.flow = self._convert(flow, 'flow')
+        self.event = self._convert(event, 'event')
+        self.payload = self._convert(payload, 'payload')
+        self.session = self._convert(session, 'session')
+        self.profile = self._convert(profile, 'profile')
 
     def __delitem__(self, key):
         if key.startswith('profile@'):
@@ -67,6 +73,12 @@ class DotAccessor:
 
     def __getitem__(self, dot_notation):
         if isinstance(dot_notation, str):
+
+            all_data = self.get_all(dot_notation)
+
+            if all_data:
+                return all_data
+
             if dot_notation.startswith('flow@'):
                 value = dot_notation[len('flow@'):]
                 try:
