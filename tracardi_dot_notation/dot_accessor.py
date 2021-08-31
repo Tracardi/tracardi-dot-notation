@@ -28,12 +28,37 @@ class DotAccessor:
         elif dot_notation.startswith('event@...'):
             return self.event
 
+        return None
+
+    def _get_value(self, dot_notation, prefix):
+        if dot_notation.startswith(prefix):
+            value = dot_notation[len(prefix):]
+            try:
+                if isinstance(value, str):
+                    return self.storage[prefix][value]
+                return value
+            except KeyError:
+                raise KeyError("Invalid dot notation. Could not find value for `{}` in {}...".format(value, prefix))
+            except TypeError as e:
+                raise KeyError("Invalid dot notation. You are trying to access {} "
+                               "when it its value is not a dictionary `{}`.".format(value, str(e)))
+
+        return None
+
     def __init__(self, profile=None, session=None, payload=None, event=None, flow=None):
         self.flow = self._convert(flow, 'flow')
         self.event = self._convert(event, 'event')
         self.payload = self._convert(payload, 'payload')
         self.session = self._convert(session, 'session')
         self.profile = self._convert(profile, 'profile')
+
+        self.storage = {
+            'profile@': self.profile,
+            'event@': self.event,
+            'payload@': self.payload,
+            'session@': self.session,
+            'flow@': self.flow,
+        }
 
     def __delitem__(self, key):
         if key.startswith('profile@'):
@@ -76,39 +101,44 @@ class DotAccessor:
 
             all_data = self.get_all(dot_notation)
 
-            if all_data:
+            if all_data is not None:
                 return all_data
 
-            if dot_notation.startswith('flow@'):
-                value = dot_notation[len('flow@'):]
-                try:
-                    return self.flow[value]
-                except KeyError:
-                    raise KeyError("Invalid dot notation. Could not find value for `{}` in flow.".format(value))
-            elif dot_notation.startswith('profile@'):
-                value = dot_notation[len('profile@'):]
-                try:
-                    return self.profile[value]
-                except KeyError:
-                    raise KeyError("Invalid dot notation. Could not find value for `{}` in profile.".format(value))
-            elif dot_notation.startswith('session@'):
-                value = dot_notation[len('session@'):]
-                try:
-                    return self.session[value]
-                except KeyError:
-                    raise KeyError("Invalid dot notation. Could not find value for `{}` in session.".format(value))
-            elif dot_notation.startswith('payload@'):
-                value = dot_notation[len('payload@'):]
-                try:
-                    return self.payload[value]
-                except KeyError:
-                    raise KeyError("Invalid dot notation. Could not find value for `{}` in payload.".format(value))
-            elif dot_notation.startswith('event@'):
-                value = dot_notation[len('event@'):]
-                try:
-                    return self.event[value]
-                except KeyError:
-                    raise KeyError("Invalid dot notation. Could not find value for `{}` in event.".format(value))
+            for prefix in self.storage.keys():
+                value = self._get_value(dot_notation, prefix)
+                if value is not None:
+                    return value
+
+            # if dot_notation.startswith('flow@'):
+            #     value = dot_notation[len('flow@'):]
+            #     try:
+            #         return self.flow[value]
+            #     except KeyError:
+            #         raise KeyError("Invalid dot notation. Could not find value for `{}` in flow.".format(value))
+            # elif dot_notation.startswith('profile@'):
+            #     value = dot_notation[len('profile@'):]
+            #     try:
+            #         return self.profile[value]
+            #     except KeyError:
+            #         raise KeyError("Invalid dot notation. Could not find value for `{}` in profile.".format(value))
+            # elif dot_notation.startswith('session@'):
+            #     value = dot_notation[len('session@'):]
+            #     try:
+            #         return self.session[value]
+            #     except KeyError:
+            #         raise KeyError("Invalid dot notation. Could not find value for `{}` in session.".format(value))
+            # elif dot_notation.startswith('payload@'):
+            #     value = dot_notation[len('payload@'):]
+            #     try:
+            #         return self.payload[value]
+            #     except KeyError:
+            #         raise KeyError("Invalid dot notation. Could not find value for `{}` in payload.".format(value))
+            # elif dot_notation.startswith('event@'):
+            #     value = dot_notation[len('event@'):]
+            #     try:
+            #         return self.event[value]
+            #     except KeyError:
+            #         raise KeyError("Invalid dot notation. Could not find value for `{}` in event.".format(value))
         return dot_notation
 
     def __contains__(self, item):
