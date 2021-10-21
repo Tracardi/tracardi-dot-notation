@@ -28,4 +28,4 @@ class DictTraverser:
             value = self.dot[value]
             out_dot[f"{path}.{key}"] = value
         result = out_dot.to_dict()
-        return result['root']
+        return result['root'] if 'root' in result else {}
