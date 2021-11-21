@@ -83,14 +83,16 @@ class DotAccessor:
             key = key[len('profile@'):]
             self.profile[key] = self.__getitem__(value) if not isinstance(value, dict) else value
         elif key.startswith('session@'):
-            raise KeyError("Could not set session, session is read only")
+            key = key[len('session@'):]
+            self.session[key] = self.__getitem__(value) if not isinstance(value, dict) else value
         elif key.startswith('flow@'):
             raise KeyError("Could not set flow, flow is read only")
         elif key.startswith('payload@'):
             key = key[len('payload@'):]
             self.payload[key] = self.__getitem__(value) if not isinstance(value, dict) else value
         elif key.startswith('event@'):
-            raise KeyError("Could not set event, event is read only")
+            key = key[len('event@'):]
+            self.event[key] = self.__getitem__(value) if not isinstance(value, dict) else value
         else:
             raise ValueError(
                 "Invalid dot notation. Accessor not available. " +
