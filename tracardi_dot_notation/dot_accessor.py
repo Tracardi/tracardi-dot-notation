@@ -65,14 +65,16 @@ class DotAccessor:
             key = key[len('profile@'):]
             del self.profile[key]
         elif key.startswith('session@'):
-            raise KeyError("Could not set session, session is read only")
+            key = key[len('session@'):]
+            del self.session[key]
         elif key.startswith('flow@'):
             raise KeyError("Could not set flow, flow is read only")
         elif key.startswith('payload@'):
             key = key[len('payload@'):]
             del self.payload[key]
         elif key.startswith('event@'):
-            raise KeyError("Could not delete event, event is read only")
+            key = key[len('event@'):]
+            del self.event[key]
         else:
             raise ValueError(
                 "Invalid dot notation. Accessor not available. " +
