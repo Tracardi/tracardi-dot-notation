@@ -6,8 +6,25 @@ from tracardi_dot_notation.dot_accessor import DotAccessor
 
 class DictTraverser:
 
-    def __init__(self, dot: DotAccessor):
+    def __init__(self, dot: DotAccessor, include_none=True, **kwargs):
+        self.include_none = include_none
         self.dot = dot
+        if 'default' in kwargs:
+            self.default = kwargs['default']
+            self.throw_error = False
+        else:
+            self.throw_error = True
+
+    def _get_value(self, path):
+        if self.throw_error is True:
+            return self.dot[path]
+
+        try:
+            value = self.dot[path]
+        except KeyError:
+            value = self.default
+
+        return value
 
     def traverse(self, value, key=None, path="root"):
         if isinstance(value, dict):
@@ -25,7 +42,13 @@ class DictTraverser:
         for key, value, path in self.traverse(reshape_template):
             if key is not None:
                 path = path[:-len(key)-1]
-            value = self.dot[value]
+
+            value = self._get_value(value)
+
+            if value is None and self.include_none is False:
+                continue
+
             out_dot[f"{path}.{key}"] = value
+
         result = out_dot.to_dict()
         return result['root'] if 'root' in result else {}

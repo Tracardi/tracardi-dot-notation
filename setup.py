@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name='tracardi-dot-notation',
-    version='0.6.6',
+    version='0.6.7',
     description='Tracardi dot notation functions.',
     long_description=long_description,
     long_description_content_type="text/markdown",
